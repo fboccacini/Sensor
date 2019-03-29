@@ -2,7 +2,7 @@
 #define Sensor_h
 
 #include "Arduino.h"
-#include "InteractionChannel.h"
+
 
 
 #define MAX_LAST_READINGS 20
@@ -28,7 +28,7 @@ class Sensor
 {
 	public:
 		/* Constructor, takes connected pin, params of the correct sensor type, and an optional name for display */
-		Sensor(short int inputPin,sensor_params params, const char label[], ControlChannel* controlChannels[], PrintChannel* printChannels[]);
+		Sensor(short int inputPin,sensor_params params, const char label[]);
 
 		///////////////////////////////////////////////////////////////////////////////////////////
 		/*                                                                                       */
@@ -47,45 +47,14 @@ class Sensor
 		void calibrate();
 
 		/* setValues: resets calibration to specified values, if intercept and slope are not given, they will not be modified */
-		void setValues(float calibrationPoints[], float intercept = NULL, float slope = NULL);
+		void setValues(float calibrationPoints[], float intercept, float slope);
 
 		/* convertInputLinear: transforms a raw value to one in the correct measure unit */
 		float convertInputLinear(float input);
 
-		//////////////////////////////////////////////////////////////////////////////////////////
-		/*																																											*/
-		/* Interaction channels setup	and management																						*/
-		/*																																											*/
-		//////////////////////////////////////////////////////////////////////////////////////////
-
-		void addPrintChannel(PrintChannel* printChannel);
-		void removePrintChannel(short int index);
-		void addControlChannel(ControlChannel* controlChannel);
-		void removeControlChannel(short int index);
 
 		/* printReading: prints formatted reading on specified printChannels. Null forall channels. */
-		void printReading(PrintChannel* channels);
-
-		/* printAll: prints a message on all print channels */
-		void printAll(const char* messsage);
-
-		/* readCharAnyControl: reads on all control channels and returns the input 							*/
-		/* of the first one to respond.																													*/
-		char readCharAnyControl();
-
-		/* readSingleIntAnyControl: like readCharAnyControl but it returns an integer						*/
-		short int readSingleIntAnyControl();
-
-		/* readSentenceAnyControl: reads on all control channels and returns the 							  */
-		/* input sentence (read chars until a accept char is given) of the first one to respond.*/
-		char* readSentenceAnyControl();
-
-		/* readIntAnyControl: like readSentenceAnyControl, but it converts the output to an integer */
-    int readIntAnyControl();
-
-		/* readFloatAnyControl: same again, but it converts to float. 													*/
-		/* The dot button marks the decimal point 																							*/
-    float readFloatAnyControl();
+		char* printReading();
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		/*																																											*/
@@ -102,7 +71,7 @@ class Sensor
 		short int getNumRedings();
 		float* getCalibrationPoints();
 		float* getLastReadings();
-
+		float (*readingFunction)(short int pin, short int numReadings);
 
 		short int numReadings;
 		short int pin;							// the pin the sensor is connected to
@@ -113,10 +82,6 @@ class Sensor
 		float _lastReadings[MAX_LAST_READINGS];			// Last taken readings of the sensor
 		char* _label;							// Label, for the display
 		sensor_params _sensorType;	// Sensor type
-
-		/* Interaction channels */
-	  ControlChannel** controlChannels;
-	  PrintChannel** printChannels;
 
 		char* currentChar;
 		char** currentSentence;
