@@ -1,7 +1,7 @@
 #include "Sensor.h"
 
 
-Sensor::Sensor(short int inputPin, sensor_params params, const char label[] = "", ControlChannel* startingControlChannels[] = {}, PrintChannel* startingPrintChannels[] = {})
+Sensor::Sensor(short int inputPin, sensor_params params, char label[] = "", ControlChannel* startingControlChannels[] = {}, PrintChannel* startingPrintChannels[] = {},float (*readFunction)())
 {
   /* Set configuration */
   short int pin = inputPin;
@@ -9,7 +9,7 @@ Sensor::Sensor(short int inputPin, sensor_params params, const char label[] = ""
 
   if(sizeof(label) == 0)
   {
-    char* label = this->_sensorType.name;
+    char* label = this->sensorType.name;
   }
   else
   {
@@ -18,12 +18,12 @@ Sensor::Sensor(short int inputPin, sensor_params params, const char label[] = ""
 
 
   /* Set default calibration */
-  float* calibrationPoints = this->_sensorType.calibrationPoints;
-  float intercept = this->_sensorType.intercept;
-  float slope = this->_sensorType.slope;
-  short int numReadings = this->_sensorType.numReadings;
-  short int readDelay = this->_sensorType.readDelay;
-
+  float* calibrationPoints = this->sensorType.calibrationPoints;
+  float intercept = this->sensorType.intercept;
+  float slope = this->sensorType.slope;
+  short int numReadings = this->sensorType.numReadings;
+  short int readDelay = this->sensorType.readDelay;
+  float (*collectRawInput)(short int pin, short int numReadings) = this->sensorType.readingFunction(pin,numReadings);
 
   /* Set interaction channels */
   ControlChannel** controlChannels = startingControlChannels;
@@ -48,16 +48,39 @@ float Sensor::collectInput()
   return value;
 }
 
-float Sensor::collectRawInput()
-{
-  return this->_sensorType.readingFunction(this->pin,this->numReadings);
-}
+// float Sensor::collectRawInput()
+// {
+//   /* When using Arduino Due, change resolution */
+//   #ifdef ARDUINO_DUE
+//     analogWriteResolution(12);
+//     analogReadResolution(12);
+//   #endif
+//
+//   float rawValuesSum = 0;
+//
+//   for (short int i = 0; i < this->numReadings; i++)
+//   {
+//     /* Read input and add it to the values sum */
+//     rawValuesSum += analogRead(this->pin);
+//   }
+//
+//   /* Reset resolution, when using Arduino Due */
+//   #ifdef ARDUINO_DUE
+//     analogWriteResolution(10);
+//     analogReadResolution(10);
+//   #endif
+//
+//   /* Return the average of the readings */
+//   return rawValuesSum / numReadings;
+//
+//   }
+// }
 
-void Sensor::printReading(PrintChannel* channels = NULL)
+void Sensor::printReading(PrintChannels* channels = NULL)
 {
   /* Prepare message */
-  const char* message;
-  sprintf(message,"%s: %f.3%s",this->_label,this->collectInput(),this->getMeasureUnit());
+  char message[50];
+  sprintf(message,"%s: %f.3%s",label,collectInput(),get_measure_unit());
 
   /* If print channel is null printAll or else cycle through the channels */
   if(channels == NULL)
@@ -68,7 +91,7 @@ void Sensor::printReading(PrintChannel* channels = NULL)
   {
     for(short int i = 0; i < sizeof(channels); i++)
     {
-      this->printChannels[i]->print(message);
+      this->printChannels[i].print(message);
     }
   }
 }
@@ -79,23 +102,23 @@ void Sensor::calibrate()
 }
 
 /* setValues: resets calibration to specified values, if intercept and slope are not given, they will not be modified */
-void Sensor::setValues(float calibrationPoints[], float intercept = NULL, float slope = NULL)
+void Sensor::setValues(float calibrationsPoints[], float intercept = NULL, float slope = NULL)
 {
-  this->_calibrationPoints = calibrationPoints;
+  this->calibrationPoints = calibrationPoints;
 
   if(intercept)
   {
-    this->_intercept = intercept;
+    this->intercept = intercept;
   }
   if(slope)
   {
-    this->_slope = slope;
+    this->slope = slope;
   }
 }
 
 float Sensor::convertInputLinear(float inputRawValue)
 {
-  return this->_slope * inputRawValue + this->_intercept;
+  return this->slope * inputRawValue + this->intercept;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -104,32 +127,32 @@ float Sensor::convertInputLinear(float inputRawValue)
 /*																																											*/
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void Sensor::addPrintChannel(PrintChannel* printChannel)
+void addPrintChannel(PrintChannel* printChannel)
 {
-  //this->printChannels++ = printChannel;
+  this->printChannels.push(printChannel);
 }
 
-void Sensor::removePrintChannel(short int index)
+void removePrintChannel(short int index)
 {
 
 }
 
-void Sensor::addControlChannel(ControlChannel* controlChannel)
+void addControlChannel(ControlChannel* controlChannel)
 {
-  //this->controlChannels++ = controlChannel;
+  this->controlChannels.push(controlChannel);
 }
 
-void Sensor::removeControlChannel(short int index)
+void removeControlChannel(short int index)
 {
 
 }
 
 /* printAll: prints a message on all print channels */
-void Sensor::printAll(const char* message)
+void printAll(char* message)
 {
   for(short int i = 0; i < sizeof(this->printChannels); i++)
   {
-    this->printChannels[i]->print(message);
+    this->printChannels[i].print(message);
   }
 }
 
@@ -155,22 +178,22 @@ char* readSentenceAnyControl()
 
 float* Sensor::getCalibrationPoints()
 {
-  return this->_calibrationPoints;
+  return this->calibrationPoints
 }
 
 float Sensor::getIntercept()
 {
-  return this->_intercept;
+  return this->intercept;
 }
 
 char* Sensor::getLabel()
 {
-  return this->_label;
+  return this->label;
 }
 
 float* Sensor::getLastReadings()
 {
-  return this->_lastReadings;
+  return this->lastReadings;
 }
 
 short int Sensor::getPin()
@@ -180,21 +203,71 @@ short int Sensor::getPin()
 
 float Sensor::getSlope()
 {
-  return this->_slope;
+  return this->slope;
 }
 
-char* Sensor::getMeasureUnit()
+char* getMeasureUnit()
 {
-  return this->_sensorType.measureUnit;
+  return this->sensorType.measureUnit;
 }
 /* Readings history rotation */
 void Sensor::pushLastReadings(float value)
 {
   /* Record the value in last readings. */
-  //this->_lastReadings->push(value);
+  this->lastReadings.push(value);
 
   /* If the buffer is full, drop the oldest value */
-  if(sizeof(this->_lastReadings) > MAX_LAST_READINGS){
-    //this->_lastReadings->pop();
+  if(sizeof(this->lastReadings) > MAX_LAST_READINGS){
+    this->lastReadings.pop();
   }
+}
+
+ECmeter::ECmeter(int pin, int onOffPin, ControlChannel controlChannels[], PrintChannel printChannels[], char name[] = [])
+{
+  /* Set configuration */
+  int _pin = pin;
+  int _onOffPin = onOffPin;
+  float _sensorType = ec_meter_params;
+  float _name = name;
+
+  /* Set default calibration */
+  float _calibrationPoints[] = _sensorType.calibrationPoints
+  float _intercept = _sensorType.intercept
+  float _slope = _sensorType.slope
+
+  /* Set interaction channels */
+  ControlChannel controlChannels[] = controlChannels;
+  PrintChannel printChannels[] = printChannels;
+
+}
+
+ECmeter::collectRawInput()
+{
+  #ifdef ARDUINO_DUE
+    analogWriteResolution(12);
+    analogReadResolution(12);
+  #endif
+
+  /* Activate sensor */
+  digitalWrite(this->onOffPin, HIGH);
+  delay(100);
+
+  float inputRawValue;
+  int numReadings = getNumReadings();
+
+  for (int i = 0; int i < numReadings; i++)
+  {
+    inputRawValue += analogRead(this->pin);
+  }
+
+  /* Deactivate sensor */
+  digitalWrite(this->onOffPin, LOW);
+
+  #ifdef ARDUINO_DUE
+    analogWriteResolution(10);
+    analogReadResolution(10);
+  #endif
+
+  /* Return the average of the readings */
+  return inputRawValue / numReadings;
 }
