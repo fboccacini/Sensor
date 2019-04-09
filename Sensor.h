@@ -6,6 +6,7 @@
 
 
 #define MAX_LAST_READINGS 20
+#define HYGROMETER 0x01
 
 
 /* This struct defines the params a sensor needs to translate raw signal into a known measure unit */
@@ -28,7 +29,7 @@ class Sensor
 {
 	public:
 		/* Constructor, takes connected pin, params of the correct sensor type, and an optional name for display */
-		Sensor(short int inputPin,sensor_params params, const char label[]);
+		Sensor(short int inputPin,short int sensorType, const char label[]);
 
 		///////////////////////////////////////////////////////////////////////////////////////////
 		/*                                                                                       */
@@ -82,9 +83,7 @@ class Sensor
 		float _lastReadings[MAX_LAST_READINGS];			// Last taken readings of the sensor
 		char* _label;							// Label, for the display
 		sensor_params _sensorType;	// Sensor type
-
-		char* currentChar;
-		char** currentSentence;
+		int _readDelay;							// Delay between readings
 
 		/* Add to the redings history. If the buffer is full rotate */
 		void pushLastReadings(float value);
