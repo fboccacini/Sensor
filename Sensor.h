@@ -2,10 +2,9 @@
 #define Sensor_h
 
 #include "Arduino.h"
-// #include "String.h"
-
 
 #define MAX_LAST_READINGS 20
+
 #define HYGROMETER 0x01
 #define AIR_THERMOMETER 0x02
 

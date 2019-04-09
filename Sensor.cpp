@@ -12,7 +12,7 @@ Sensor::Sensor(short int inputPin, short int sensorType, const char* label = "")
       this->_sensorType = hygrometer_params;
       break;
     case AIR_THERMOMETER:
-      this->_sensorType = thermometer_air_params;
+      this->_sensorType = air_thermometer_params;
       break;
     default:
       this->_sensorType = ec_meter_params;
