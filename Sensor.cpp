@@ -2,7 +2,7 @@
 #include "Arduino.h"
 #include "SensorTypes.h"
 
-Sensor::Sensor(short int inputPin, short int sensorType, const char* label = "")
+Sensor::Sensor(short int inputPin, short int sensorType, const char* label)
 {
   /* Set configuration */
   this->pin = inputPin;
@@ -20,7 +20,7 @@ Sensor::Sensor(short int inputPin, short int sensorType, const char* label = "")
 
   this->readingFunction = this->_sensorType.readingFunction;
 
-  if(sizeof(label) == 0)
+  if(label == NULL)
   {
     this->_label = this->_sensorType.name;
   }
@@ -59,8 +59,8 @@ float Sensor::collectInput()
 
 float Sensor::collectRawInput()
 {
-  float val = this->readingFunction(this->pin,this->numReadings);
-  return val;
+
+  return this->readingFunction(this->pin,this->numReadings);
   // return basicReading(this->pin,this->numReadings);
   // return this->_sensorType.readingFunction(this->pin,this->numReadings);
   // return basicReading(this->pin,this->numReadings);
@@ -70,17 +70,17 @@ String Sensor::printReading()
 {
 
   /* Prepare message */
-  char* message = malloc(20 * sizeof(char));
+  char* message = malloc(50 * sizeof(char));
 
   char* mu = this->getMeasureUnit();
   char* label = this->_label;
-  float val = this->collectRawInput();
+  float val = this->collectInput();
 
   // Arduino inplementation does not include %f, therefore transform the value to string
   char str_val[7];
   dtostrf(val, 4, 3, str_val);
 
-  sprintf(message,"%s: %s%s",label,str_val,mu);
+  sprintf(message,"%-20s: %s%s",label,str_val,mu);
 
   // Convert it to String, otherwise the pointer will be discarded
   return (String)message;

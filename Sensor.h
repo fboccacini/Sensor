@@ -5,9 +5,8 @@
 
 #define MAX_LAST_READINGS 20
 
-#define HYGROMETER 0x01
+#define HYGROMETER 			0x01
 #define AIR_THERMOMETER 0x02
-
 
 /* This struct defines the params a sensor needs to translate raw signal into a known measure unit */
 typedef struct sensor_params {
