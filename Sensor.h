@@ -2,7 +2,7 @@
 #define Sensor_h
 
 #include "Arduino.h"
-
+// #include "String.h"
 
 
 #define MAX_LAST_READINGS 20
@@ -55,7 +55,7 @@ class Sensor
 
 
 		/* printReading: prints formatted reading on specified printChannels. Null forall channels. */
-		char* printReading();
+		String printReading();
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		/*																																											*/

@@ -45,32 +45,42 @@ Sensor::Sensor(short int inputPin, short int sensorType, const char* label = "")
 float Sensor::collectInput()
 {
   /* Do the reading and onvert the result to a useful form, using sensor type properties */
-  float value = convertInputLinear(collectRawInput());
+  float val = this->collectRawInput();
+  float value = this->convertInputLinear(val);
 
   /* Record the value in the readings history. */
-  pushLastReadings(value);
+  //pushLastReadings(value);
 
   return value;
 }
 
 float Sensor::collectRawInput()
 {
-
-  return readingFunction(this->pin,this->numReadings);
+  float val = this->readingFunction(this->pin,this->numReadings);
+  return val;
   // return basicReading(this->pin,this->numReadings);
   // return this->_sensorType.readingFunction(this->pin,this->numReadings);
   // return basicReading(this->pin,this->numReadings);
 }
 
-char* Sensor::printReading()
+String Sensor::printReading()
 {
 
   /* Prepare message */
-  char message[50];
-  //sprintf(message,"%s: %.3f%s",this->_label,this->collectInput(),this->getMeasureUnit());
-  sprintf(message,"%f",this->collectRawInput());
+  char* message = malloc(20 * sizeof(char));
 
-  return message;
+  char* mu = this->getMeasureUnit();
+  char* label = this->_label;
+  float val = this->collectRawInput();
+
+  // Arduino inplementation does not include %f, therefore transform the value to string
+  char str_val[7];
+  dtostrf(val, 4, 3, str_val);
+
+  sprintf(message,"%s: %s%s",label,str_val,mu);
+
+  // Convert it to String, otherwise the pointer will be discarded
+  return (String)message;
 
 }
 
