@@ -14,6 +14,15 @@ Sensor::Sensor(short int inputPin, short int sensorType, const char* label)
     case AIR_THERMOMETER:
       this->_sensorType = air_thermometer_params;
       break;
+    case CO_SENSOR:
+      this->_sensorType = co_sensor_params;
+      break;
+    case ETOH_SENSOR:
+      this->_sensorType = etoh_sensor_params;
+      break;
+    case NOX_SENSOR:
+      this->_sensorType = nox_sensor_params;
+      break;
     default:
       this->_sensorType = ec_meter_params;
   }
@@ -70,14 +79,19 @@ String Sensor::printReading()
 {
 
   /* Prepare message */
-  char* message = malloc(50 * sizeof(char));
+  // char* message = malloc(50 * sizeof(char));
+  char message[50];
+  for(int i; i < 50; i++)
+  {
+    message[i] = 0x00;
+  }
 
   char* mu = this->getMeasureUnit();
   char* label = this->_label;
   float val = this->collectInput();
 
   // Arduino inplementation does not include %f, therefore transform the value to string
-  char str_val[7];
+  char str_val[8];
   dtostrf(val, 4, 3, str_val);
 
   sprintf(message,"%-20s: %s%s",label,str_val,mu);

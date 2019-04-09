@@ -7,6 +7,9 @@
 
 #define HYGROMETER 			0x01
 #define AIR_THERMOMETER 0x02
+#define CO_SENSOR				0x03
+#define NOX_SENSOR			0x04
+#define ETOH_SENSOR			0x05
 
 /* This struct defines the params a sensor needs to translate raw signal into a known measure unit */
 typedef struct sensor_params {
