@@ -8,7 +8,7 @@
 /*																																											*/
 //////////////////////////////////////////////////////////////////////////////////////////
 
-float basicReading(short int pin, short int numReadings)
+float basicAnalogReading(short int pin, short int numReadings)
 {
 	pinMode(pin,INPUT);
 	/* When using Arduino Due, change resolution */
@@ -24,7 +24,7 @@ float basicReading(short int pin, short int numReadings)
 		/* Read input and add it to the values sum */
 		rawValuesSum += analogRead(pin);
 	}
-	
+
 	/* Reset resolution, when using Arduino Due */
 	#ifdef ARDUINO_DUE
 		analogWriteResolution(10);
@@ -55,18 +55,18 @@ float basicReading(short int pin, short int numReadings)
 	/* TODO: set correct defaults for all sensor types																																*/
 	/*																																																								*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// sensor_params anemometer_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Anemometer", "m/s", &basicReading };
-	sensor_params ec_meter_params = { 1, 0, 100, 10, 2, {400.0, 2000.0}, "EC meter", "uS/cm", &basicReading };						// TODO: use utf-8 characters for maths and chemistry symbols
-	sensor_params hygrometer_params = { 1, 0, 100, 10, 2, {4.0, 7.0}, "Hygrometer", "%", &basicReading };
-	// sensor_params lux_meter_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Lux meter", "pH", &basicReading };
-	// sensor_params ph_meter_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "PH meter", "pH", &basicReading };
-	// sensor_params soil_moisture_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Soil moisture meter", "pH", &basicReading };
-	sensor_params air_thermometer_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Air thermometer", "C", &basicReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
-	sensor_params co_sensor_params = { 1, 0, 100, 10, 2, {4.0, 7.0}, "CO sensor", "ppm", &basicReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
-	sensor_params nox_sensor_params = { 1, 0, 100, 10, 2, {4.0, 7.0}, "NOx sensor", "ppm", &basicReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
-	sensor_params etoh_sensor_params = { 1, 0, 100, 10, 2, {4.0, 7.0}, "EtOH sensor", "ppm", &basicReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
-	// sensor_params thermometer_soil_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Soil thermometer", "C", &basicReading };  // TODO: use utf-8 characters for maths and chemistry symbols
-	// sensor_params thermometer_water_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Water thermometer", "C", &basicReading };// TODO: use utf-8 characters for maths and chemistry symbols
-	// sensor_params volume_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Volume meter", "Db", &basicReading };
+	// sensor_params anemometer_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Anemometer", "m/s", &basicAnalogReading };
+	sensor_params ec_meter_params = { 1, 0, 100, 10, 2, {400.0, 2000.0}, "EC meter", "uS/cm", &basicAnalogReading };						// TODO: use utf-8 characters for maths and chemistry symbols
+	sensor_params hygrometer_params = { 1, 0, 100, 10, 2, {4.0, 7.0}, "Hygrometer", "%", &basicAnalogReading };
+	// sensor_params lux_meter_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Lux meter", "pH", &basicAnalogReading };
+	// sensor_params ph_meter_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "PH meter", "pH", &basicAnalogReading };
+	// sensor_params soil_moisture_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Soil moisture meter", "pH", &basicAnalogReading };
+	sensor_params air_thermometer_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Air thermometer", "C", &basicAnalogReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
+	sensor_params co_sensor_params = { 1, 0, 100, 10, 2, {4.0, 7.0}, "CO sensor", "ppm", &basicAnalogReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
+	sensor_params nox_sensor_params = { 1, 0, 100, 10, 2, {4.0, 7.0}, "NOx sensor", "ppm", &basicAnalogReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
+	sensor_params etoh_sensor_params = { 1, 0, 100, 10, 2, {4.0, 7.0}, "EtOH sensor", "ppm", &basicAnalogReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
+	// sensor_params thermometer_soil_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Soil thermometer", "C", &basicAnalogReading };  // TODO: use utf-8 characters for maths and chemistry symbols
+	// sensor_params thermometer_water_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Water thermometer", "C", &basicAnalogReading };// TODO: use utf-8 characters for maths and chemistry symbols
+	// sensor_params volume_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Volume meter", "Db", &basicAnalogReading };
 
 #endif

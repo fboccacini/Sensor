@@ -50,7 +50,7 @@ class Sensor
 		void calibrate();
 
 		/* setValues: resets calibration to specified values, if intercept and slope are not given, they will not be modified */
-		void setValues(float calibrationPoints[], float intercept, float slope);
+		void setValues(float calibrationPoints[10], float intercept, float slope);
 
 		/* convertInputLinear: transforms a raw value to one in the correct measure unit */
 		float convertInputLinear(float input);
@@ -75,15 +75,18 @@ class Sensor
 		float* getCalibrationPoints();
 		float* getLastReadings();
 		float (*readingFunction)(short int pin, short int numReadings);
+		void (*printingFunction)(char* message);
+		void (*controlFunction)(char* message);
 
 		short int numReadings;
 		short int pin;							// the pin the sensor is connected to
 	private:
 		float _intercept;						// TODO: complete comments
 		float _slope;								// TODO: complete comments
-		float* _calibrationPoints;	// TODO: complete comments
+		float _calibrationPoints[10];	// TODO: complete comments
+		short int _numCalibrationPoints;
 		float _lastReadings[MAX_LAST_READINGS];			// Last taken readings of the sensor
-		char* _label;							// Label, for the display
+		const char* _label;							// Label, for the display
 		sensor_params _sensorType;	// Sensor type
 		int _readDelay;							// Delay between readings
 
