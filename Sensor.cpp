@@ -23,9 +23,40 @@ Sensor::Sensor(short int inputPin, short int sensorType, const char* label)
     case NOX_SENSOR:
       this->_sensorType = nox_sensor_params;
       break;
+    case VOLUME_SENSOR:
+      this->_sensorType = volume_params;
+      break;
     default:
       this->_sensorType = ec_meter_params;
   }
+
+  this->readingFunction = this->_sensorType.readingFunction;
+
+  if(label == NULL)
+  {
+    this->_label = this->_sensorType.name;
+  }
+  else
+  {
+    this->_label = label;
+  }
+
+
+  /* Set default calibration */
+  this->_calibrationPoints = this->_sensorType.calibrationPoints;
+  this->_intercept = this->_sensorType.intercept;
+  this->_slope = this->_sensorType.slope;
+  this->numReadings = this->_sensorType.numReadings;
+  this->_readDelay = this->_sensorType.readDelay;
+
+}
+
+Sensor::Sensor(short int inputPin, sensor_params sensorType, const char* label)
+{
+  /* Set configuration */
+  this->pin = inputPin;
+
+  this->_sensorType = sensorType;
 
   this->readingFunction = this->_sensorType.readingFunction;
 

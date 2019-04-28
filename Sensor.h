@@ -5,11 +5,13 @@
 
 #define MAX_LAST_READINGS 20
 
+#define CUSTOM					0x00
 #define HYGROMETER 			0x01
 #define AIR_THERMOMETER 0x02
 #define CO_SENSOR				0x03
 #define NOX_SENSOR			0x04
 #define ETOH_SENSOR			0x05
+#define VOLUME_SENSOR		0x06
 
 /* This struct defines the params a sensor needs to translate raw signal into a known measure unit */
 typedef struct sensor_params {
@@ -32,6 +34,7 @@ class Sensor
 	public:
 		/* Constructor, takes connected pin, params of the correct sensor type, and an optional name for display */
 		Sensor(short int inputPin,short int sensorType, const char label[]);
+		Sensor(short int inputPin, sensor_params sensorType, const char label[]);
 
 		///////////////////////////////////////////////////////////////////////////////////////////
 		/*                                                                                       */
