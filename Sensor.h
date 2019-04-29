@@ -12,6 +12,10 @@
 #define NOX_SENSOR			0x04
 #define ETOH_SENSOR			0x05
 #define VOLUME_SENSOR		0x06
+#define LIGHT_SENSOR		0x07
+#define RED_LIGHT_SENSOR		0x08
+#define BLUE_LIGHT_SENSOR		0x09
+#define ULTRAVIOLET_LIGHT_SENSOR		0x0A
 
 /* This struct defines the params a sensor needs to translate raw signal into a known measure unit */
 typedef struct sensor_params {
@@ -24,6 +28,7 @@ typedef struct sensor_params {
 		float calibrationPoints[10];
 		const char* name;
 		const char* measureUnit;
+		short int decimals;
 		float (*readingFunction)(short int pin, short int numReadings);
 
 	};

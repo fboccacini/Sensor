@@ -1,4 +1,4 @@
-#define ARDUINO_DUE 0x01
+// #define ARDUINO_DUE 0x01
 #include "Sensor.h"
 #include "Arduino.h"
 #include "SensorTypes.h"
@@ -26,6 +26,18 @@ Sensor::Sensor(short int inputPin, short int sensorType, const char* label)
       break;
     case VOLUME_SENSOR:
       this->_sensorType = volume_params;
+      break;
+    case LIGHT_SENSOR:
+      this->_sensorType = light_sensor_params;
+      break;
+    case BLUE_LIGHT_SENSOR:
+      this->_sensorType = blue_light_sensor_params;
+      break;
+    case RED_LIGHT_SENSOR:
+      this->_sensorType = red_light_sensor_params;
+      break;
+    case ULTRAVIOLET_LIGHT_SENSOR:
+      this->_sensorType = ultraviolet_light_sensor_params;
       break;
     default:
       this->_sensorType = ec_meter_params;
@@ -77,7 +89,12 @@ Sensor::Sensor(short int inputPin, sensor_params sensorType, const char* label)
 
 
   /* Set default calibration */
-  this->_calibrationPoints = this->_sensorType.calibrationPoints;
+  this->_numCalibrationPoints = this->_sensorType.numCalibrationPoints;
+  for(int i = 0; i < this->_numCalibrationPoints; i++)
+  {
+    this->_calibrationPoints[i] = this->_sensorType.calibrationPoints[i];
+  }
+
   this->_intercept = this->_sensorType.intercept;
   this->_slope = this->_sensorType.slope;
   this->numReadings = this->_sensorType.numReadings;
@@ -172,9 +189,10 @@ void Sensor::calibrate()
     // HC06.println(message);
 
     customKey = NULL;
-    while (customKey != 'C')                                  //read and print the sensor value and
+    while (customKey != 'c' && customKey != 'C')                                  //read and print the sensor value and
     {
       customKey = Serial.read();
+
       inputRawValue = this->collectRawInput();
 
       arrayX[i] = inputRawValue;
@@ -182,13 +200,14 @@ void Sensor::calibrate()
       message = "";
       message = String("Raw value = " + String(inputRawValue) + "; Current value = " + String(this->convertInputLinear(inputRawValue))); //
       Serial.println(message);
-      // HC06.println(message);
+
       delay(100);
     }
+    delay(3000);
     message = "";
     message = String("Reference point " + String(i + 1) + " acquired");        // AFTER data acquisition calculate the arrays
     Serial.println(message);
-    // HC06.println(message);
+
     arrayX2[i] = arrayX[i] * arrayX[i];
     arrayY2[i] = arrayY[i] * arrayY[i];
     arrayXY[i] = arrayX[i] * arrayY[i];
@@ -239,25 +258,25 @@ void Sensor::calibrate()
 #ifdef DEBUG_linearCalibration
   message = String("sum X = " + String(sumX, 4));
   Serial.println(message);
-  HC06.println(message);
+  // HC06.println(message);
   message = String("sum X2 = " + String(sumX2, 4));
   Serial.println(message);
-  HC06.println(message);
+  // HC06.println(message);
   message = String("sum Y = " + String(sumY, 4));
   Serial.println(message);
-  HC06.println(message);
+  // HC06.println(message);
   message = String("sum Y2 = " + String(sumY2, 4));
   Serial.println(message);
-  HC06.println(message);
+  // HC06.println(message);
   message = String("sum XY = " + String(sumXY, 4));
   Serial.println(message);
-  HC06.println(message);
+  // HC06.println(message);
   message = String("slope = " + String(this->_slope, 4));
   Serial.println(message);
-  HC06.println(message);
+  // HC06.println(message);
   message = String("intercept = " + String(this->_intercept, 4));
   Serial.println(message);
-  HC06.println(message);
+  // HC06.println(message);
 #endif
 
 }
