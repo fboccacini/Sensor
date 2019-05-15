@@ -1,6 +1,6 @@
 // #define ARDUINO_DUE 0x01
-#include "Sensor.h"
 #include "Arduino.h"
+#include "Sensor.h"
 #include "SensorTypes.h"
 
 Sensor::Sensor(short int inputPin, short int sensorType, const char* label)
@@ -39,6 +39,12 @@ Sensor::Sensor(short int inputPin, short int sensorType, const char* label)
     case ULTRAVIOLET_LIGHT_SENSOR:
       this->_sensorType = ultraviolet_light_sensor_params;
       break;
+    case ANALOGIC_THERMOMETER:
+      this->_sensorType = analogic_thermometer_params;
+      break;
+    case SOIL_MOISTURE_METER:
+      this->_sensorType = soil_moisture_params;
+      break;
     default:
       this->_sensorType = ec_meter_params;
   }
@@ -66,6 +72,8 @@ Sensor::Sensor(short int inputPin, short int sensorType, const char* label)
   this->_slope = this->_sensorType.slope;
   this->numReadings = this->_sensorType.numReadings;
   this->_readDelay = this->_sensorType.readDelay;
+
+  this->streams[0] = NULL;
 
 }
 
@@ -100,6 +108,13 @@ Sensor::Sensor(short int inputPin, sensor_params sensorType, const char* label)
   this->numReadings = this->_sensorType.numReadings;
   this->_readDelay = this->_sensorType.readDelay;
 
+  /* Initialize streams array */
+  for(int i; i < MAX_IO_STREAMS; i++)
+  {
+    this->streams[i] = NULL;
+  }
+
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -129,11 +144,10 @@ float Sensor::collectRawInput()
   // return basicReading(this->pin,this->numReadings);
 }
 
-String Sensor::printReading()
+String Sensor::formattedReading()
 {
 
   /* Prepare message */
-  // char* message = malloc(50 * sizeof(char));
   char message[50];
   for(int i; i < 50; i++)
   {
@@ -163,6 +177,11 @@ String Sensor::printReading()
 
 }
 
+void Sensor::printReading(int stream)
+{
+  this->streams[stream]->println(this->formattedReading());
+}
+
 void Sensor::calibrate()
 {
   short int pointsNumber = this->_numCalibrationPoints;
@@ -178,20 +197,20 @@ void Sensor::calibrate()
 
   String message = "";
   message = String("sensor N° " + String(this->_label) + F("; Calibration points ") + String(pointsNumber) + F("; readings per  point ") + String(this->numReadings)); // put the sensor in the reference...
-  Serial.println(message);
+  this->streams[0]->println(message);
   // HC06.println(message);
 
   for (int i = 0; i < pointsNumber; i++)                   // for every calibration point do:
   {
     message = "";
     message = String("Insert the sensor in calibration point " + String(i + 1) + ". Press C to acquire"); // put the sensor in the reference...
-    Serial.println(message);
+    this->streams[0]->println(message);
     // HC06.println(message);
 
     customKey = NULL;
     while (customKey != 'c' && customKey != 'C')                                  //read and print the sensor value and
     {
-      customKey = Serial.read();
+      customKey = this->streams[0]->read();
 
       inputRawValue = this->collectRawInput();
 
@@ -199,14 +218,14 @@ void Sensor::calibrate()
       arrayY[i] = this->_calibrationPoints[i];
       message = "";
       message = String("Raw value = " + String(inputRawValue) + "; Current value = " + String(this->convertInputLinear(inputRawValue))); //
-      Serial.println(message);
+      this->streams[0]->println(message);
 
       delay(100);
     }
     delay(3000);
     message = "";
     message = String("Reference point " + String(i + 1) + " acquired");        // AFTER data acquisition calculate the arrays
-    Serial.println(message);
+    this->streams[0]->println(message);
 
     arrayX2[i] = arrayX[i] * arrayX[i];
     arrayY2[i] = arrayY[i] * arrayY[i];
@@ -214,19 +233,19 @@ void Sensor::calibrate()
 
 #ifdef DEBUG_linearCalibration
     message = String("x = " + String(arrayX[i]));
-    Serial.println(message);
+    this->streams[0]->println(message);
     // HC06.println(message);
     message = String("x2 = " + String(arrayX2[i]));
-    Serial.println(message);
+    this->streams[0]->println(message);
     // HC06.println(message);
     message = String("y = " + String(arrayY[i]));
-    Serial.println(message);
+    this->streams[0]->println(message);
     // HC06.println(message);
     message = String("y2 = " + String(arrayY2[i]));
-    Serial.println(message);
+    this->streams[0]->println(message);
     // HC06.println(message);
     message = String("xy = " + String(arrayXY[i]));
-    Serial.println(message);
+    this->streams[0]->println(message);
     // HC06.println(message);
 #endif
   }
@@ -252,30 +271,30 @@ void Sensor::calibrate()
 #endif
 
   message = String("Slope =  " + String(this->_slope, 4) + "; Intercept = " + String(this->_intercept, 4));
-  Serial.println(message);
+  this->streams[0]->println(message);
   // HC06.println(message);
 
 #ifdef DEBUG_linearCalibration
   message = String("sum X = " + String(sumX, 4));
-  Serial.println(message);
+  this->streams[0]->println(message);
   // HC06.println(message);
   message = String("sum X2 = " + String(sumX2, 4));
-  Serial.println(message);
+  this->streams[0]->println(message);
   // HC06.println(message);
   message = String("sum Y = " + String(sumY, 4));
-  Serial.println(message);
+  this->streams[0]->println(message);
   // HC06.println(message);
   message = String("sum Y2 = " + String(sumY2, 4));
-  Serial.println(message);
+  this->streams[0]->println(message);
   // HC06.println(message);
   message = String("sum XY = " + String(sumXY, 4));
-  Serial.println(message);
+  this->streams[0]->println(message);
   // HC06.println(message);
   message = String("slope = " + String(this->_slope, 4));
-  Serial.println(message);
+  this->streams[0]->println(message);
   // HC06.println(message);
   message = String("intercept = " + String(this->_intercept, 4));
-  Serial.println(message);
+  this->streams[0]->println(message);
   // HC06.println(message);
 #endif
 
@@ -305,6 +324,49 @@ float Sensor::convertInputLinear(float inputRawValue)
   return this->_slope * inputRawValue + this->_intercept;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+/*																																											*/
+/* I/O management																																				*/
+/*																																											*/
+//////////////////////////////////////////////////////////////////////////////////////////
+
+int Sensor::streamAdd(Stream &stream)
+{
+
+  CustomSerial* defaultStream = new CustomSerial(stream);
+  int p = 0;
+  while(this->streams[p] != NULL && p < MAX_IO_STREAMS) { p++; }
+
+  /* If there's room for a new stream add it */
+  if(p < MAX_IO_STREAMS)
+  {
+    this->streams[p] = defaultStream;
+    this->streamTest(p);
+  } else {
+    // Probably best would be to throw an exception
+  }
+
+
+}
+
+void Sensor::streamTest(int stream)
+{
+  this->streams[stream]->println("Testing stream " + String(stream) + ". Press 'c' to exit.");
+
+  /* Read and print on the stream until exit character is pressed */
+  char c;
+
+  while(c != 'c')
+  {
+
+    while((c = this->streams[stream]->read()) < 1) {}
+    this->streams[stream]->println(c);
+
+  }
+
+  this->streams[stream]->println("Testing of stream " + String(stream) + " complete.\n");
+
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /*																																											*/

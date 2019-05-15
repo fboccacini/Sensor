@@ -119,7 +119,8 @@ float dhtTemperatureReading(short int pin, short int numReadings)
 	sensor_params ultraviolet_light_sensor_params = { 1, 0, 100, 10, 2, {0.0, 100.0}, "Ultraviolet light intensity", "xx",0, &basicAnalogicReading };
 	// sensor_params lux_meter_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Lux meter", "pH", &basicReading };
 	// sensor_params ph_meter_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "PH meter", "pH", &basicReading };
-	// sensor_params soil_moisture_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Soil moisture meter", "pH", &basicReading };
+	sensor_params soil_moisture_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Soil moisture meter", "%",2, &basicAnalogicReading };
+	sensor_params analogic_thermometer_params = { 1, 0, 100, 10, 2, {0.0, 100.0}, "Thermometer", "C",1, &basicAnalogicReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
 	sensor_params air_thermometer_params = { -0.0273, 19.655, 100, 10, 2, {4.0, 7.0}, "Air thermometer", "C",1, &dhtTemperatureReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
 	sensor_params co_sensor_params = { 1, 0, 100, 10, 2, {0.0, 100.0}, "CO sensor", "ppm",0, &basicAnalogicReading  };		// TODO: use utf-8 characters for maths and chemistry symbols
 	sensor_params nox_sensor_params = { 1, 0, 100, 10, 2, {4.0, 7.0}, "NOx sensor", "ppm",0, &basicAnalogicReading  };		// TODO: use utf-8 characters for maths and chemistry symbols

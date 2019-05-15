@@ -2,8 +2,10 @@
 #define Sensor_h
 
 #include "Arduino.h"
+#include "SoftwareSerial.h"
 
 #define MAX_LAST_READINGS 20
+#define MAX_IO_STREAMS		10
 
 #define CUSTOM					0x00
 #define HYGROMETER 			0x01
@@ -16,6 +18,8 @@
 #define RED_LIGHT_SENSOR		0x08
 #define BLUE_LIGHT_SENSOR		0x09
 #define ULTRAVIOLET_LIGHT_SENSOR		0x0A
+#define ANALOGIC_THERMOMETER				0x0B
+#define SOIL_MOISTURE_METER					0x0C
 
 /* This struct defines the params a sensor needs to translate raw signal into a known measure unit */
 typedef struct sensor_params {
@@ -33,6 +37,53 @@ typedef struct sensor_params {
 
 	};
 
+class CustomSerial {
+
+private:
+  Stream &stream;
+
+public:
+	// CustomSerial(HardwareSerial &_stream) : stream(_stream) {}
+  CustomSerial(Stream &_stream) : stream(_stream) {}
+
+
+  char read() {
+    return stream.read();
+  }
+
+  int available() {
+    return stream.available();
+  }
+
+  int peek() {
+    return stream.peek();
+  }
+
+  void write(byte b) {
+    stream.write(b);
+  }
+
+  void println(String string) {
+    stream.println(string);
+  }
+
+	void println(int n) {
+    stream.println(n);
+  }
+
+	void println(char c) {
+    stream.println(c);
+  }
+
+  void print(String string) {
+    stream.print(string);
+  }
+
+	void print(char c) {
+    stream.print(c);
+  }
+
+};
 
 class Sensor
 {
@@ -63,9 +114,23 @@ class Sensor
 		/* convertInputLinear: transforms a raw value to one in the correct measure unit */
 		float convertInputLinear(float input);
 
+		/* formattedReading: returns a formatted string with sensor's name, reading and measure unit */
+		String formattedReading();
 
 		/* printReading: prints formatted reading on specified printChannels. Null forall channels. */
-		String printReading();
+		void printReading(int stream);
+
+		//////////////////////////////////////////////////////////////////////////////////////////
+		/*																																											*/
+		/* I/O management																																				*/
+		/*																																											*/
+		//////////////////////////////////////////////////////////////////////////////////////////
+
+		/* Add an I/O stream to the sensor */
+		int streamAdd(Stream &stream);
+
+		/* Test a stream (prints input to the output of an I/O stream) */
+		void streamTest(int stream);
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		/*																																											*/
@@ -97,7 +162,8 @@ class Sensor
 		const char* _label;							// Label, for the display
 		sensor_params _sensorType;	// Sensor type
 		int _readDelay;							// Delay between readings
-
+		CustomSerial* streams[MAX_IO_STREAMS];
+		// CustomSerial* defaultStream;
 		/* Add to the redings history. If the buffer is full rotate */
 		void pushLastReadings(float value);
 };
