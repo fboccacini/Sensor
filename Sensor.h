@@ -43,12 +43,30 @@ private:
   Stream &stream;
 
 public:
-	// CustomSerial(HardwareSerial &_stream) : stream(_stream) {}
-  CustomSerial(Stream &_stream) : stream(_stream) {}
 
+  CustomSerial(Stream &_stream) : stream(_stream) { }
+
+	CustomSerial(Stream &_stream,char (*getKey)()) : stream(_stream) {
+		this->readFunction = getKey;
+	}
+
+	CustomSerial(Stream &_stream,char (*getKey)(),void (*writeChar)(String s)) : stream(_stream) {
+		this->readFunction = getKey;
+		this->printFunction = writeChar;
+	}
+
+	char (*readFunction)() = NULL;
+	void (*printFunction)(String s) = NULL;
 
   char read() {
-    return stream.read();
+
+		if(this->readFunction == NULL)
+		{
+			return stream.read();
+		} else {
+			return this->readFunction();
+		}
+
   }
 
   int available() {
@@ -64,7 +82,23 @@ public:
   }
 
   void println(String string) {
-    stream.println(string);
+
+		if(this->printFunction == NULL)
+		{
+			stream.println(string);
+		} else {
+			this->printFunction(string);
+			// int l = string.length();
+			// Serial.println(string);
+			// Serial.println(l);
+			// for(int i = 0; i < l; i++)
+			// {
+			// 	Serial.println(i);
+			// 	this->printFunction(string.charAt(i));
+			//
+			// }
+		}
+
   }
 
 	void println(int n) {
@@ -72,15 +106,36 @@ public:
   }
 
 	void println(char c) {
-    stream.println(c);
+
+		if(this->printFunction == NULL)
+		{
+			stream.print(c);
+		} else {
+			this->printFunction(String(c));
+		}
+
   }
 
   void print(String string) {
-    stream.print(string);
+
+		if(this->printFunction == NULL)
+		{
+			stream.print(string);
+		} else {
+			this->printFunction(string);
+		}
+
   }
 
 	void print(char c) {
-    stream.print(c);
+
+		if(this->printFunction == NULL)
+		{
+			stream.print(c);
+		} else {
+			this->printFunction(String(c));
+		}
+
   }
 
 };
@@ -120,6 +175,9 @@ class Sensor
 		/* printReading: prints formatted reading on specified printChannels. Null forall channels. */
 		void printReading(int stream);
 
+		/* printAll: prints formatted reading on all printChannels. */
+		void printAll();
+
 		//////////////////////////////////////////////////////////////////////////////////////////
 		/*																																											*/
 		/* I/O management																																				*/
@@ -128,6 +186,7 @@ class Sensor
 
 		/* Add an I/O stream to the sensor */
 		int streamAdd(Stream &stream);
+		int streamAdd(Stream &stream,char (*getKey)(),void (*writeChar)(String s));
 
 		/* Test a stream (prints input to the output of an I/O stream) */
 		void streamTest(int stream);

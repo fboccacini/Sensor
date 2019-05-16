@@ -168,7 +168,7 @@ String Sensor::formattedReading()
   char str_val[8];
   dtostrf(val, 4, 3, str_val);
 
-  sprintf(message,"%-20s: %s%s",label,str_val,mu);
+  sprintf(message,"%-7s: %s%s",label,str_val,mu);
 
   #endif
 
@@ -180,6 +180,19 @@ String Sensor::formattedReading()
 void Sensor::printReading(int stream)
 {
   this->streams[stream]->println(this->formattedReading());
+}
+
+void Sensor::printAll()
+{
+  for(int i = 0; i < MAX_IO_STREAMS; i++)
+  {
+
+    if(this->streams[i] != NULL)
+    {
+      this->printReading(i);
+    }
+  }
+
 }
 
 void Sensor::calibrate()
@@ -349,22 +362,44 @@ int Sensor::streamAdd(Stream &stream)
 
 }
 
+int Sensor::streamAdd(Stream &stream,char (*getKey)(),void (*writeChar)(String s))
+{
+
+  CustomSerial* defaultStream = new CustomSerial(stream,getKey,writeChar);
+  int p = 0;
+  while(this->streams[p] != NULL && p < MAX_IO_STREAMS) { p++; }
+
+  /* If there's room for a new stream add it */
+  if(p < MAX_IO_STREAMS)
+  {
+    this->streams[p] = defaultStream;
+    this->streamTest(p);
+  } else {
+    // Probably best would be to throw an exception
+  }
+
+
+}
+
 void Sensor::streamTest(int stream)
 {
   this->streams[stream]->println("Testing stream " + String(stream) + ". Press 'c' to exit.");
+  this->streams[0]->println("Testing stream " + String(stream) + ". Press 'c' to exit.");
 
   /* Read and print on the stream until exit character is pressed */
   char c;
 
-  while(c != 'c')
+  while(c != 'c' && c != 'C')
   {
 
-    while((c = this->streams[stream]->read()) < 1) {}
+    while((c = this->streams[stream]->read()) < 1) { }
     this->streams[stream]->println(c);
+    this->streams[0]->println(c);
 
   }
 
   this->streams[stream]->println("Testing of stream " + String(stream) + " complete.\n");
+  this->streams[0]->println("Testing of stream " + String(stream) + " complete.\n");
 
 }
 
