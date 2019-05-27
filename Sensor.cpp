@@ -343,48 +343,104 @@ float Sensor::convertInputLinear(float inputRawValue)
 /*																																											*/
 //////////////////////////////////////////////////////////////////////////////////////////
 
+int Sensor::streamPush(InteractionChannel* ioChannel)
+{
+
+  int p = 0;
+  while(this->streams[p] != NULL && p < MAX_IO_STREAMS) { p++; }
+
+  /* If there's room for a new stream add it */
+  if(p < MAX_IO_STREAMS)
+  {
+    this->streams[p] = ioChannel;
+  } else {
+    // Probably best would be to throw an exception
+  }
+  return p;
+
+}
+
 int Sensor::streamAdd(Stream &stream)
 {
 
-  CustomSerial* defaultStream = new CustomSerial(stream);
-  int p = 0;
-  while(this->streams[p] != NULL && p < MAX_IO_STREAMS) { p++; }
+  InteractionChannel* ioChannel = new InteractionChannel(stream);
+  int i = this->streamPush(ioChannel);
+  this->streamTest(i);
 
-  /* If there's room for a new stream add it */
-  if(p < MAX_IO_STREAMS)
-  {
-    this->streams[p] = defaultStream;
-    this->streamTest(p);
-  } else {
-    // Probably best would be to throw an exception
-  }
-
+  return i;
 
 }
 
-int Sensor::streamAdd(Stream &stream,char (*getKey)(),void (*writeChar)(String s))
+int Sensor::streamAdd(Stream &stream,char (*getKey)())
 {
 
-  CustomSerial* defaultStream = new CustomSerial(stream,getKey,writeChar);
-  int p = 0;
-  while(this->streams[p] != NULL && p < MAX_IO_STREAMS) { p++; }
+  InteractionChannel* ioChannel = new InteractionChannel(stream,getKey);
+  int i = this->streamPush(ioChannel);
+  this->streamTest(i);
 
-  /* If there's room for a new stream add it */
-  if(p < MAX_IO_STREAMS)
-  {
-    this->streams[p] = defaultStream;
-    this->streamTest(p);
-  } else {
-    // Probably best would be to throw an exception
-  }
-
+  return i;
 
 }
+
+int Sensor::streamAdd(Stream &stream,void (*writeChar)(String s))
+{
+
+  InteractionChannel* ioChannel = new InteractionChannel(stream,writeChar);
+  int i = this->streamPush(ioChannel);
+  this->streamTest(i);
+
+  return i;
+
+}
+
+int Sensor::streamAdd(char (*getKey)(),void (*writeChar)(String s))
+{
+
+  InteractionChannel* ioChannel = new InteractionChannel(getKey,writeChar);
+  int i = this->streamPush(ioChannel);
+  this->streamTest(i);
+
+  return i;
+
+}
+
+/* Additional stream constructors provided by InteractionChannel */
+// #ifdef InteractionChannel_h
+
+/* Keypad and LCD constructors */
+int Sensor::streamAdd(Stream &_stream,Keypad* keypad)
+{
+  InteractionChannel* ioChannel = new InteractionChannel(_stream,keypad);
+  int i = this->streamPush(ioChannel);
+  this->streamTest(i);
+
+  return i;
+
+}
+int Sensor::streamAdd(Stream &_stream,LiquidCrystal &lcd)
+{
+  InteractionChannel* ioChannel = new InteractionChannel(_stream,lcd);
+  int i = this->streamPush(ioChannel);
+  this->streamTest(i);
+
+  return i;
+
+}
+int Sensor::streamAdd(Keypad* keypad,LiquidCrystal* lcd)
+{
+  InteractionChannel* ioChannel = new InteractionChannel(keypad,lcd);
+  int i = this->streamPush(ioChannel);
+  this->streamTest(i);
+
+  return i;
+
+}
+
+// #endif
 
 void Sensor::streamTest(int stream)
 {
   this->streams[stream]->println("Testing stream " + String(stream) + ". Press 'c' to exit.");
-  this->streams[0]->println("Testing stream " + String(stream) + ". Press 'c' to exit.");
 
   /* Read and print on the stream until exit character is pressed */
   char c;
@@ -394,12 +450,10 @@ void Sensor::streamTest(int stream)
 
     while((c = this->streams[stream]->read()) < 1) { }
     this->streams[stream]->println(c);
-    this->streams[0]->println(c);
 
   }
 
   this->streams[stream]->println("Testing of stream " + String(stream) + " complete.\n");
-  this->streams[0]->println("Testing of stream " + String(stream) + " complete.\n");
 
 }
 
