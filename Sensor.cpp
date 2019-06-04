@@ -73,7 +73,11 @@ Sensor::Sensor(short int inputPin, short int sensorType, const char* label)
   this->numReadings = this->_sensorType.numReadings;
   this->_readDelay = this->_sensorType.readDelay;
 
-  this->streams[0] = NULL;
+  /* Initialize streams array */
+  for(int i; i < MAX_IO_STREAMS; i++)
+  {
+    this->streams[i] = NULL;
+  }
 
 }
 
@@ -113,7 +117,6 @@ Sensor::Sensor(short int inputPin, sensor_params sensorType, const char* label)
   {
     this->streams[i] = NULL;
   }
-
 
 }
 
@@ -417,7 +420,7 @@ int Sensor::streamAdd(Stream &_stream,Keypad* keypad)
   return i;
 
 }
-int Sensor::streamAdd(Stream &_stream,LiquidCrystal &lcd)
+int Sensor::streamAdd(Stream &_stream,LiquidCrystal* lcd)
 {
   InteractionChannel* ioChannel = new InteractionChannel(_stream,lcd);
   int i = this->streamPush(ioChannel);
@@ -426,8 +429,10 @@ int Sensor::streamAdd(Stream &_stream,LiquidCrystal &lcd)
   return i;
 
 }
+
 int Sensor::streamAdd(Keypad* keypad,LiquidCrystal* lcd)
 {
+
   InteractionChannel* ioChannel = new InteractionChannel(keypad,lcd);
   int i = this->streamPush(ioChannel);
   this->streamTest(i);
@@ -442,13 +447,15 @@ void Sensor::streamTest(int stream)
 {
   this->streams[stream]->println("Testing stream " + String(stream) + ". Press 'c' to exit.");
 
+  /* This is required to clean the serial cache */
+  this->streams[stream]->read();
+
   /* Read and print on the stream until exit character is pressed */
   char c;
-
   while(c != 'c' && c != 'C')
   {
 
-    while((c = this->streams[stream]->read()) < 1) { }
+    while((c = this->streams[stream]->read()) < 1) {  }
     this->streams[stream]->println(c);
 
   }

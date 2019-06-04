@@ -200,7 +200,7 @@ class Sensor
 
 		/* Keypad and LCD constructors */
 		int streamAdd(Stream &_stream,Keypad* keypad);
-		int streamAdd(Stream &_stream,LiquidCrystal &lcd);
+		int streamAdd(Stream &_stream,LiquidCrystal* lcd);
 		int streamAdd(Keypad* keypad,LiquidCrystal* lcd);
 
 		// #endif
